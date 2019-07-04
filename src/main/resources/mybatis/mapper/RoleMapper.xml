@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shaunk.mapper.RoleMapper">
+
+    <select id="listRole" parameterType="com.shaunk.vo.QueryRoleVo" resultType="com.shaunk.vo.RoleVo">
+      select
+        id id,
+        name name,
+        remark remark,
+        create_time createTime
+      FROM system_role
+      <where>
+          <if test="name != null and name != ''">
+              and name like concat('%' ,#{name} ,'%')
+          </if>
+      </where>
+      order by create_time asc
+    </select>
+
+    <select id="selectRoleById" parameterType="Integer" resultType="com.shaunk.vo.RoleVo">
+        select
+            id id,
+            name name,
+            remark remark,
+            create_time createTime
+        FROM system_role
+        where
+          id = #{id}
+        limit 1
+    </select>
+
+    <select id="selectRoleMenu" parameterType="java.lang.Integer" resultType="java.lang.String">
+        select
+          concat('m_',menu_id) id
+        FROM system_role_menu
+        where
+          role_id = #{roleId}
+        UNION
+        select
+          concat('a_', action_id) id
+        from system_role_menu_action
+        where
+          role_id = #{roleId}
+    </select>
+</mapper>

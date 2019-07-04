@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shaunk.mapper.MenuMapper">
+
+    <select id="listMenu" resultType="com.shaunk.vo.MenuVo">
+      select
+        id id,
+        code code,
+        title title,
+        icon icon,
+        component component,
+        path path,
+        parent_id parentId,
+        level level,
+        type type,
+        status status,
+        rank rank,
+        remark remark
+      FROM system_menu
+      order by rank asc
+    </select>
+
+    <select id="listMenuByLevel" resultType="com.shaunk.vo.MenuVo">
+      select
+        id id,
+        code code,
+        title title,
+        icon icon,
+        component component,
+        path path,
+        parent_id parentId,
+        level level,
+        type type,
+        status status,
+        rank rank,
+        remark remark
+      FROM system_menu
+      where level = #{level}
+      order by rank asc
+    </select>
+
+    <select id="listMenuTreeByLevel" resultType="com.shaunk.vo.MenuTreeVo">
+         select
+             concat('m_',id) `key`,
+            title title,
+            type `type`,
+            status status,
+            level level,
+            parent_id parentId,
+            id menuId,
+            rank rank
+        FROM system_menu
+        where level = #{level}
+        order by rank asc
+    </select>
+
+    <select id="listMenuAction" resultType="com.shaunk.vo.MenuTreeVo">
+        select
+            concat('a_',id) `key`,
+            name title,
+            menu_id menuId
+        FROM system_menu_action
+        order by create_time asc
+    </select>
+
+
+    <select id="listMenuByUserId" parameterType="java.lang.Integer" resultType="com.shaunk.vo.MenuVo">
+        SELECT
+            sm.id id,
+            sm.CODE code,
+            sm.title title,
+            sm.icon icon,
+            sm.component component,
+            sm.path path,
+            sm.parent_id parentId,
+            sm.LEVEL level,
+            sm.type type,
+            sm.STATUS status,
+            sm.rank rank,
+            sm.remark remark
+        FROM
+            system_user_role sur left join system_role sr on sur.role_id = sr.id
+             left join system_role_menu srm on sr.id = srm.role_id
+        left join system_menu sm on srm.menu_id = sm.id
+        WHERE
+            sur.user_id = #{userId}
+        ORDER BY
+            sm.rank ASC
+    </select>
+
+    <select id="selectMenuActionByMenuId" parameterType="java.lang.Integer" resultType="com.shaunk.vo.MenuActionVo">
+        SELECT
+            id id,
+            menu_id menuId,
+            name name,
+            code code,
+            remark remark,
+            id `key`
+        from system_menu_action
+        where menu_id = #{menuId}
+        order by create_time asc
+    </select>
+
+    <!--<select id="selectMenuByParentId" parameterType="Integer" resultType="com.common.qvo.system.MenuInfoVo">-->
+        <!--select-->
+        <!--id id,-->
+        <!--code code,-->
+        <!--title title,-->
+        <!--icon icon,-->
+        <!--path path,-->
+        <!--component component,-->
+        <!--parent_id parentId,-->
+        <!--level level,-->
+        <!--type type,-->
+        <!--status status,-->
+        <!--rank rank,-->
+        <!--remark remark-->
+        <!--FROM system_menu-->
+        <!--where parent_id = #{pid}-->
+        <!--order by rank asc-->
+    <!--</select>-->
+
+    <!--<select id="selectMenuById" parameterType="Integer" resultType="com.common.qvo.system.MenuInfoVo">-->
+        <!--select-->
+            <!--id id,-->
+            <!--code code,-->
+            <!--title title,-->
+            <!--icon icon,-->
+            <!--path path,-->
+            <!--component component,-->
+            <!--parent_id parentId,-->
+            <!--level level,-->
+            <!--type type,-->
+            <!--status status,-->
+            <!--rank rank,-->
+            <!--remark remark-->
+        <!--FROM system_menu-->
+        <!--where id = #{id}-->
+        <!--limit 1-->
+    <!--</select>-->
+
+    <!--<select id="selectMenuByRoleId" parameterType="Integer" resultType="com.common.qvo.system.MenuInfoVo">-->
+        <!--select-->
+            <!--id id,-->
+            <!--code code,-->
+            <!--title title,-->
+            <!--icon icon,-->
+            <!--path path,-->
+            <!--component component,-->
+            <!--parent_id parentId,-->
+            <!--level level,-->
+            <!--type type,-->
+            <!--status status,-->
+            <!--rank rank,-->
+            <!--remark remark-->
+        <!--FROM system_menu-->
+        <!--where id in (select menu_id from system_role_menu where role_id = #{roleId})-->
+    <!--</select>-->
+
+    <!--<select id="selectMenuActionByRoleId" parameterType="Integer" resultType="com.common.qvo.system.MenuActionInfoVo">-->
+         <!--SELECT-->
+          <!--id id,-->
+          <!--menu_id menuId,-->
+          <!--name name,-->
+          <!--code code,-->
+          <!--remark remark,-->
+          <!--id `key`-->
+        <!--from system_menu_action-->
+        <!--where id in (select action_id from system_role_menu_action where role_id = #{roleId})-->
+    <!--</select>-->
+
+    <!--<select id="selectMenuActionByMenuId" parameterType="java.lang.Integer" resultType="com.common.qvo.system.MenuActionInfoVo">-->
+        <!--SELECT-->
+          <!--id id,-->
+          <!--menu_id menuId,-->
+          <!--name name,-->
+          <!--code code,-->
+          <!--remark remark,-->
+          <!--id `key`-->
+        <!--from system_menu_action-->
+        <!--where menu_id = #{menuId}-->
+        <!--order by create_time asc-->
+    <!--</select>-->
+
+    <!--<select id="selectMenuTreeByParentId" parameterType="Integer" resultType="com.common.qvo.system.MenuTreeVo">-->
+        <!--select-->
+            <!--id `key`,-->
+            <!--title title,-->
+            <!--type `type`,-->
+            <!--status status-->
+        <!--FROM system_menu-->
+        <!--where parent_id = #{pid}-->
+        <!--order by rank asc-->
+    <!--</select>-->
+
+    <!--<select id="selectMenuTreeActionByMenuId" parameterType="java.lang.String" resultType="com.common.qvo.system.MenuTreeVo">-->
+        <!--select-->
+            <!--concat('a_', id) `key`,-->
+            <!--name title-->
+        <!--FROM system_menu_action-->
+        <!--where menu_id = #{menuId}-->
+    <!--</select>-->
+
+    <!--<select id="selectAllMenuActions" resultType="com.common.qvo.system.MenuTreeVo">-->
+        <!--select-->
+          <!--concat('a_', id) `key`,-->
+          <!--menu_id menuId,-->
+          <!--name title-->
+        <!--FROM system_menu_action-->
+    <!--</select>-->
+
+    <!--<select id="selectAllMenus" resultType="com.common.qvo.system.MenuTreeVo">-->
+        <!--select-->
+            <!--id `key`,-->
+            <!--title title,-->
+            <!--type `type`,-->
+            <!--status status,-->
+            <!--level level,-->
+            <!--parent_id parentId,-->
+            <!--id menuId,-->
+            <!--rank rank-->
+        <!--FROM system_menu-->
+        <!--order by rank asc-->
+    <!--</select>-->
+
+    <!--<delete id="deleteMenu" parameterType="java.lang.Integer">-->
+        <!--delete from system_menu where id = #{menuId}-->
+    <!--</delete>-->
+
+    <!--<delete id="deleteRoleMenu" parameterType="java.lang.Integer">-->
+        <!--delete from system_role_menu where menu_id = #{menuId}-->
+    <!--</delete>-->
+
+    <!--<delete id="deleteMenuAction" parameterType="java.lang.Integer">-->
+        <!--delete from system_menu_action where id = #{actionId}-->
+    <!--</delete>-->
+
+    <!--<delete id="deleteRoleMenuAction" parameterType="java.lang.Integer">-->
+        <!--delete from system_role_menu_action where action_id = #{actionId}-->
+    <!--</delete>-->
+</mapper>
