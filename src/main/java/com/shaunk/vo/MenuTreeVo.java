@@ -22,6 +22,9 @@ public class MenuTreeVo {
     private boolean disabled = false;
     private boolean disableCheckbox = false;
     private boolean selectable = true;
+
+
+    private String code;
     /**
      * 类型
      */

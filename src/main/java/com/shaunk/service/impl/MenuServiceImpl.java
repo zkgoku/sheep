@@ -85,7 +85,31 @@ public class MenuServiceImpl implements MenuServiceI{
 
         List<MenuTreeVo> list2 = menuMapper.listMenuTreeByLevel(2);
 
+        List<MenuTreeVo> list3 = menuMapper.listMenuTreeByLevel(2);
+
         List<MenuTreeVo> actions = menuMapper.listMenuAction();
+        // 初始化tree
+        initTreeMenu(list1, list2, list3, actions);
+        return R.ok(list1);
+    }
+
+    @Override
+    public R userTreeMenu(Integer userId) throws Exception {
+
+        List<MenuTreeVo> list1 = menuMapper.listUserMenuTreeByLevel(1, userId);
+
+        List<MenuTreeVo> list2 = menuMapper.listUserMenuTreeByLevel(2, userId);
+
+        List<MenuTreeVo> list3 = menuMapper.listUserMenuTreeByLevel(3, userId);
+
+        List<MenuTreeVo> actions = menuMapper.listUserMenuAction(userId);
+        // 初始化tree
+        initTreeMenu(list1, list2,list3, actions);
+
+        return R.ok(list1);
+    }
+
+    private List<MenuTreeVo> initTreeMenu(List<MenuTreeVo> list1, List<MenuTreeVo> list2,  List<MenuTreeVo> list3, List<MenuTreeVo> actions){
         // 组长成树形
         for (MenuTreeVo m1Vo : list1) {
             // 如果是页面
@@ -94,17 +118,21 @@ public class MenuServiceImpl implements MenuServiceI{
             }else {
                 List<MenuTreeVo> temp2 = getMenu(m1Vo.getMenuId(), list2);
                 for (MenuTreeVo m2Vo : temp2) {
-                   if (m2Vo.getType() == 2){
-                       m2Vo.setChildren(getMenuAction(m2Vo.getMenuId(), actions));
-                   }
+                    if (m2Vo.getType() == 2){
+                        m2Vo.setChildren(getMenuAction(m2Vo.getMenuId(), actions));
+                    }else {
+                        List<MenuTreeVo> temp3 = getMenu(m2Vo.getMenuId(), list3);
+                        for (MenuTreeVo m3Vo : temp3) {
+                            m3Vo.setChildren(getMenuAction(m3Vo.getMenuId(), actions));
+                        }
+                    }
                 }
                 Collections.sort(temp2, Comparator.comparing(MenuTreeVo::getRank));
                 m1Vo.setChildren(temp2);
             }
         }
-        return R.ok(list1);
+        return list1;
     }
-
 
     private List<MenuTreeVo> getMenu(Integer menuId, List<MenuTreeVo> list){
         List<MenuTreeVo> result = Lists.newArrayList();
@@ -180,7 +208,7 @@ public class MenuServiceImpl implements MenuServiceI{
         }catch (Exception e){
             log.error("{}", e);
         }
-        return R.ok();
+        return R.ok("操作成功");
     }
 
 

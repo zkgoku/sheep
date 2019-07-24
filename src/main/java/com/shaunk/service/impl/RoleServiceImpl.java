@@ -7,7 +7,9 @@ import com.google.common.collect.Maps;
 import com.shaunk.core.vo.R;
 import com.shaunk.entity.Role;
 import com.shaunk.entity.RoleMenu;
+import com.shaunk.entity.RoleMenuAction;
 import com.shaunk.mapper.RoleMapper;
+import com.shaunk.mapper.RoleMenuActionMapper;
 import com.shaunk.mapper.RoleMenuMapper;
 import com.shaunk.service.RoleServiceI;
 import com.shaunk.utils.CommonUtils;
@@ -39,6 +41,8 @@ public class RoleServiceImpl implements RoleServiceI{
     private RoleMapper roleMapper;
     @Autowired
     private RoleMenuMapper roleMenuMapper;
+    @Autowired
+    private RoleMenuActionMapper roleMenuActionMapper;
 
     @Override
     public R pageRole(QueryRoleVo queryRoleVo) throws Exception {
@@ -130,7 +134,11 @@ public class RoleServiceImpl implements RoleServiceI{
             }
         }
         for (String id : delMenus) {
-            roleMenuMapper.delete(new RoleMenu(roleId, Integer.valueOf(id)));
+            if (id.contains("a_")){
+                roleMenuActionMapper.delete(new RoleMenuAction(roleId, Integer.valueOf(id.split("_")[1])));
+            }else {
+                roleMenuMapper.delete(new RoleMenu(roleId, Integer.valueOf(id.split("_")[1])));
+            }
         }
         // 需要新增的
         List<String> addMenus = Lists.newArrayList();
@@ -141,7 +149,11 @@ public class RoleServiceImpl implements RoleServiceI{
 
         }
         for (String id : addMenus) {
-            roleMenuMapper.insert(new RoleMenu(roleId, Integer.valueOf(id)));
+            if (id.contains("a_")){
+                roleMenuActionMapper.insert(new RoleMenuAction(roleId, Integer.valueOf(id.split("_")[1])));
+            }else {
+                roleMenuMapper.insert(new RoleMenu(roleId, Integer.valueOf(id.split("_")[1])));
+            }
         }
         return R.ok("授权成功");
     }

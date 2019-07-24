@@ -25,6 +25,7 @@ public interface RoleServiceI {
 
     /**
      * 角色列表
+     * @param queryRoleVo
      * @return
      * @throws Exception
      */

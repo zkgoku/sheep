@@ -7,9 +7,11 @@ import com.google.common.collect.Lists;
 import com.shaunk.core.intercepter.UserContextHolder;
 import com.shaunk.core.vo.R;
 import com.shaunk.core.vo.UserInfo;
+import com.shaunk.entity.Notice;
 import com.shaunk.entity.User;
 import com.shaunk.entity.UserRole;
 import com.shaunk.mapper.MenuMapper;
+import com.shaunk.mapper.NoticeMapper;
 import com.shaunk.mapper.UserMapper;
 import com.shaunk.mapper.UserRoleMapper;
 import com.shaunk.service.UserServiceI;
@@ -48,6 +50,8 @@ public class UserServiceImpl implements UserServiceI{
     private UserRoleMapper userRoleMapper;
     @Autowired
     private MenuMapper menuMapper;
+    @Autowired
+    private NoticeMapper noticeMapper;
 
 
     @Override
@@ -81,21 +85,26 @@ public class UserServiceImpl implements UserServiceI{
                 return R.fail("用户无资源权限,请联系管理员");
             }
             // 组装权限下的菜单
-            List<MenuVo> menuVos = getUserMenu(userInfo.getId());
+            List<MenuVo> menuVos = this.getUserMenu(userInfo.getId());
             if (menuVos == null || menuVos.size() == 0){
                 log.error("<用户无资源权限>,用户信息->{}", loginVo);
                 return R.fail("用户无资源权限,请联系管理员");
             }
             userInfo.setMenus(menuVos);
-            // 生成token
-            userInfo.setToken(JwtUtil.generateToken(userInfo));
 
-            // 放入缓存信息
-            this.setUserInfoByCache(userInfo);
+            // 生成token
+            UserInfo cacheUserInfo = getUserInfoByCache(userInfo.getId());
+            if (cacheUserInfo == null){
+                userInfo.setToken(JwtUtil.generateToken(userInfo));
+                // 放入缓存信息
+                this.setUserInfoByCache(userInfo);
+            }
+
+            // 未读消息
 
             return R.ok(userInfo);
         }catch (Exception e){
-            log.error("user", e);
+            log.error("login", e);
         }
         return R.fail();
     }
@@ -120,6 +129,11 @@ public class UserServiceImpl implements UserServiceI{
             log.error(e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public UserInfo getUserInfoByCache(Integer userId) {
+        return getUserInfoByCache(String.valueOf(userId));
     }
 
     @Override
@@ -171,13 +185,21 @@ public class UserServiceImpl implements UserServiceI{
         indexVo.setTitle("主页");
         indexVo.setComponent("BasicLayout");
         List<MenuVo> list = menuMapper.listMenuByUserId(userId);
+        List<MenuTreeVo> listAction =  menuMapper.listUserMenuAction(userId);
         List<MenuVo> list1 = getMenuItem(0, 1, list);
         for (MenuVo menuVo : list1) {
-            List<MenuVo> list2 = getMenuItem(menuVo.getId(), 2, list);
-            if (list2 != null && list2.size() > 0) {
+            if (menuVo.getType() == 2){
+                menuVo.setPermission(getMenuActionItem(menuVo.getId(), listAction));
+            }else {
+                List<MenuVo> list2 = getMenuItem(menuVo.getId(), 2, list);
                 for (MenuVo vo : list2) {
-                    List<MenuVo> list3 = getMenuItem(vo.getId(), 3, list);
-                    if (list3 != null && list3.size() > 0) {
+                    if (vo.getType() == 2){
+                        vo.setPermission(getMenuActionItem(vo.getId(), listAction));
+                    }else {
+                        List<MenuVo> list3 = getMenuItem(vo.getId(), 3, list);
+                        for (MenuVo menuVo1 : list3) {
+                            menuVo1.setPermission(getMenuActionItem(menuVo1.getId(), listAction));
+                        }
                         vo.setChildren(list3);
                     }
                 }
@@ -199,6 +221,22 @@ public class UserServiceImpl implements UserServiceI{
             }
         }
         return treeVos;
+    }
+
+    private String[] getMenuActionItem(Integer menuId, List<MenuTreeVo> list){
+        List<String> result = Lists.newArrayList();
+        for (MenuTreeVo menuTreeVo : list) {
+            if (menuId.equals(menuTreeVo.getMenuId())){
+                result.add(menuTreeVo.getCode());
+            }
+        }
+        String[] arr = new String[result.size()];
+        return result.toArray(arr);
+    }
+
+    @Override
+    public List<MenuActionVo> getUserMenuAction(Integer userId) {
+        return null;
     }
 
     @Override
@@ -297,5 +335,66 @@ public class UserServiceImpl implements UserServiceI{
         return R.ok("操作成功");
     }
 
+    @Override
+    public R pageNotice(QueryNoticeVO queryNoticeVO) throws Exception {
 
+        PageHelper.startPage(queryNoticeVO.getPageNo(), queryNoticeVO.getPageSize());
+
+        return R.ok(new PageInfo<>(noticeMapper.listNotice(queryNoticeVO)));
+    }
+
+    @Override
+    public R addNotice(NoticeVO noticeVO) throws Exception {
+
+        UserInfo userInfo = UserContextHolder.get();
+        Notice notice = new Notice();
+        BeanUtils.copyProperties(noticeVO, notice);
+        notice.setCreateTime(new Date());
+        notice.setUserId(userInfo.getId());
+        noticeMapper.insert(notice);
+        return R.ok("保存成功");
+    }
+
+    @Override
+    public R editNotice(NoticeVO noticeVO) throws Exception {
+
+        Notice notice = noticeMapper.selectOne(new Notice(noticeVO.getId()));
+        notice.setTitle(noticeVO.getTitle());
+        notice.setContent(noticeVO.getContent());
+        notice.setContentHtml(noticeVO.getContentHtml());
+        notice.setStatus(noticeVO.getStatus());
+        noticeMapper.updateByPrimaryKeySelective(notice);
+        return R.ok("修改成功");
+    }
+
+    @Override
+    public R operNotice(NoticeVO noticeVO) throws Exception {
+
+        try {
+
+            Notice notice = noticeMapper.selectOne(new Notice(noticeVO.getId()));
+            switch (noticeVO.getAction()){
+                // 删除
+                case 1:
+                    noticeMapper.delete(notice);
+                    break;
+                // 上线
+                case 2:
+                    notice.setStatus(1);
+                    noticeMapper.updateByPrimaryKeySelective(notice);
+                    break;
+                // 下线
+                case 3:
+                    notice.setStatus(-1);
+                    noticeMapper.updateByPrimaryKeySelective(notice);
+                    break;
+                default:
+                    // todo everything
+                    break;
+            }
+        }catch (Exception e){
+            log.error("user", e);
+        }
+        return R.ok("操作成功");
+    }
 }

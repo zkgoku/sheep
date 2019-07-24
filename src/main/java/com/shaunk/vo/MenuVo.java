@@ -2,6 +2,7 @@ package com.shaunk.vo;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
+import lombok.NonNull;
 
 import java.util.List;
 
@@ -43,6 +44,9 @@ public class MenuVo {
 
     private Integer action;
 
-    private List<MenuVo> children = Lists.newArrayList();
+    private String[] permission;
+
+    private List<MenuVo> children;
+
 
 }

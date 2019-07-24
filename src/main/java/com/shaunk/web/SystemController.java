@@ -88,6 +88,20 @@ public class SystemController {
     }
 
 
+    /**
+     * 用户权限列表
+     * @param userVo
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/auth/user")
+    public R authUser(@ModelAttribute UserVo userVo) throws Exception {
+
+        return menuService.userTreeMenu(userVo.getId());
+    }
+
+
+
 
 
     /**
@@ -292,6 +306,54 @@ public class SystemController {
     public R delMenu(@ModelAttribute MenuActionVo menuActionVo) throws Exception {
 
         return menuService.delMenuAction(menuActionVo);
+    }
+
+    /**
+     * 通知列表 分页
+     * @param queryNoticeVO
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/page/notice")
+    public R pageNotice(QueryNoticeVO queryNoticeVO) throws Exception {
+
+        return userService.pageNotice(queryNoticeVO);
+    }
+
+    /**
+     * 新增通知
+     * @param noticeVO
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/add/notice")
+    public R addNotice(NoticeVO noticeVO) throws Exception {
+
+        return userService.addNotice(noticeVO);
+    }
+
+    /**
+     * 编辑通知
+     * @param noticeVO
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/edit/notice")
+    public R editNotice(NoticeVO noticeVO) throws Exception {
+
+        return userService.editNotice(noticeVO);
+    }
+
+    /**
+     * 操作 通知
+     * @param noticeVO
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/oper/notice")
+    public R operNotice(@ModelAttribute NoticeVO noticeVO) throws Exception {
+
+        return userService.operNotice(noticeVO);
     }
 
 }

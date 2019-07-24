@@ -33,6 +33,9 @@ public interface MenuServiceI {
      */
     R treeMenu(QueryMenuVo queryMenuVo) throws Exception;
 
+
+    R userTreeMenu(Integer userId) throws Exception;
+
     /**
      * 新增菜单信息
      * @param menuVo

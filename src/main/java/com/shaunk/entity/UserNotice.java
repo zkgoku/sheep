@@ -1,6 +1,5 @@
 package com.shaunk.entity;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,36 +7,39 @@ import lombok.NoArgsConstructor;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
+
+/**
+ * @Project sheep
+ * @Package com.shaunk.entity
+ * @Name Notice
+ * @Version 1.0
+ * @Data: 2019/7/5 11:32 AM
+ * @Author: shaunk
+ * @Description: TODO
+ */
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "system_role")
-public class Role implements Serializable {
+@Table(name = "system_notice")
+public class UserNotice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @KeySql(useGeneratedKeys = true)
     private Integer id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "user_id")
+    private Integer userId;
 
-    @Column(name = "remark")
-    private String remark;
+    @Column(name = "notice_id")
+    private Integer noticeId;
 
-    @Column(name = "create_time")
-    private Date createTime;
+    @Column(name = "if_read")
+    private Integer ifRead;
 
-
-    // 非数据库字段,必须加@Transient注解
-
-    public Role(Integer id) {
-        this.id = id;
-    }
 
 }

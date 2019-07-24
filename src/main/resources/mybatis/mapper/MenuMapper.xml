@@ -78,12 +78,12 @@
             sm.STATUS status,
             sm.rank rank,
             sm.remark remark
-        FROM
-            system_user_role sur left join system_role sr on sur.role_id = sr.id
-             left join system_role_menu srm on sr.id = srm.role_id
+        FROM system_user_role sur
+        left join system_role sr on sur.role_id = sr.id
+        left join system_role_menu srm on sr.id = srm.role_id
         left join system_menu sm on srm.menu_id = sm.id
         WHERE
-            sur.user_id = #{userId}
+            sur.user_id = #{userId} and sm.id is not null
         ORDER BY
             sm.rank ASC
     </select>
@@ -101,141 +101,39 @@
         order by create_time asc
     </select>
 
-    <!--<select id="selectMenuByParentId" parameterType="Integer" resultType="com.common.qvo.system.MenuInfoVo">-->
-        <!--select-->
-        <!--id id,-->
-        <!--code code,-->
-        <!--title title,-->
-        <!--icon icon,-->
-        <!--path path,-->
-        <!--component component,-->
-        <!--parent_id parentId,-->
-        <!--level level,-->
-        <!--type type,-->
-        <!--status status,-->
-        <!--rank rank,-->
-        <!--remark remark-->
-        <!--FROM system_menu-->
-        <!--where parent_id = #{pid}-->
-        <!--order by rank asc-->
-    <!--</select>-->
+    <select id="listUserMenuTreeByLevel" resultType="com.shaunk.vo.MenuTreeVo">
+        SELECT
+            concat('m_', sm.id) `key`,
+            sm.title title,
+            sm.type `type`,
+            sm.status status,
+            sm.level level,
+            sm.parent_id parentId,
+            sm.id menuId,
+            sm.rank rank
+        FROM system_user_role sur
+        left join system_role sr on sur.role_id = sr.id
+        left join system_role_menu srm on sr.id = srm.role_id
+        left join system_menu sm on srm.menu_id = sm.id
+        WHERE
+            sur.user_id = #{userId} and sm.level = #{level}
+        ORDER BY
+            sm.rank ASC
+    </select>
 
-    <!--<select id="selectMenuById" parameterType="Integer" resultType="com.common.qvo.system.MenuInfoVo">-->
-        <!--select-->
-            <!--id id,-->
-            <!--code code,-->
-            <!--title title,-->
-            <!--icon icon,-->
-            <!--path path,-->
-            <!--component component,-->
-            <!--parent_id parentId,-->
-            <!--level level,-->
-            <!--type type,-->
-            <!--status status,-->
-            <!--rank rank,-->
-            <!--remark remark-->
-        <!--FROM system_menu-->
-        <!--where id = #{id}-->
-        <!--limit 1-->
-    <!--</select>-->
+    <select id="listUserMenuAction" resultType="com.shaunk.vo.MenuTreeVo">
+        select
+            concat('a_',sm.id) `key`,
+            sm.code,
+            sm.name title,
+            sm.menu_id menuId
+        FROM system_user_role sur
+        left join system_role sr on sur.role_id = sr.id
+        left join system_role_menu_action srm on sr.id = srm.role_id
+        left join system_menu_action sm on srm.action_id = sm.id
+        where sur.user_id = #{userId}
+        order by sm.create_time asc
+    </select>
 
-    <!--<select id="selectMenuByRoleId" parameterType="Integer" resultType="com.common.qvo.system.MenuInfoVo">-->
-        <!--select-->
-            <!--id id,-->
-            <!--code code,-->
-            <!--title title,-->
-            <!--icon icon,-->
-            <!--path path,-->
-            <!--component component,-->
-            <!--parent_id parentId,-->
-            <!--level level,-->
-            <!--type type,-->
-            <!--status status,-->
-            <!--rank rank,-->
-            <!--remark remark-->
-        <!--FROM system_menu-->
-        <!--where id in (select menu_id from system_role_menu where role_id = #{roleId})-->
-    <!--</select>-->
 
-    <!--<select id="selectMenuActionByRoleId" parameterType="Integer" resultType="com.common.qvo.system.MenuActionInfoVo">-->
-         <!--SELECT-->
-          <!--id id,-->
-          <!--menu_id menuId,-->
-          <!--name name,-->
-          <!--code code,-->
-          <!--remark remark,-->
-          <!--id `key`-->
-        <!--from system_menu_action-->
-        <!--where id in (select action_id from system_role_menu_action where role_id = #{roleId})-->
-    <!--</select>-->
-
-    <!--<select id="selectMenuActionByMenuId" parameterType="java.lang.Integer" resultType="com.common.qvo.system.MenuActionInfoVo">-->
-        <!--SELECT-->
-          <!--id id,-->
-          <!--menu_id menuId,-->
-          <!--name name,-->
-          <!--code code,-->
-          <!--remark remark,-->
-          <!--id `key`-->
-        <!--from system_menu_action-->
-        <!--where menu_id = #{menuId}-->
-        <!--order by create_time asc-->
-    <!--</select>-->
-
-    <!--<select id="selectMenuTreeByParentId" parameterType="Integer" resultType="com.common.qvo.system.MenuTreeVo">-->
-        <!--select-->
-            <!--id `key`,-->
-            <!--title title,-->
-            <!--type `type`,-->
-            <!--status status-->
-        <!--FROM system_menu-->
-        <!--where parent_id = #{pid}-->
-        <!--order by rank asc-->
-    <!--</select>-->
-
-    <!--<select id="selectMenuTreeActionByMenuId" parameterType="java.lang.String" resultType="com.common.qvo.system.MenuTreeVo">-->
-        <!--select-->
-            <!--concat('a_', id) `key`,-->
-            <!--name title-->
-        <!--FROM system_menu_action-->
-        <!--where menu_id = #{menuId}-->
-    <!--</select>-->
-
-    <!--<select id="selectAllMenuActions" resultType="com.common.qvo.system.MenuTreeVo">-->
-        <!--select-->
-          <!--concat('a_', id) `key`,-->
-          <!--menu_id menuId,-->
-          <!--name title-->
-        <!--FROM system_menu_action-->
-    <!--</select>-->
-
-    <!--<select id="selectAllMenus" resultType="com.common.qvo.system.MenuTreeVo">-->
-        <!--select-->
-            <!--id `key`,-->
-            <!--title title,-->
-            <!--type `type`,-->
-            <!--status status,-->
-            <!--level level,-->
-            <!--parent_id parentId,-->
-            <!--id menuId,-->
-            <!--rank rank-->
-        <!--FROM system_menu-->
-        <!--order by rank asc-->
-    <!--</select>-->
-
-    <!--<delete id="deleteMenu" parameterType="java.lang.Integer">-->
-        <!--delete from system_menu where id = #{menuId}-->
-    <!--</delete>-->
-
-    <!--<delete id="deleteRoleMenu" parameterType="java.lang.Integer">-->
-        <!--delete from system_role_menu where menu_id = #{menuId}-->
-    <!--</delete>-->
-
-    <!--<delete id="deleteMenuAction" parameterType="java.lang.Integer">-->
-        <!--delete from system_menu_action where id = #{actionId}-->
-    <!--</delete>-->
-
-    <!--<delete id="deleteRoleMenuAction" parameterType="java.lang.Integer">-->
-        <!--delete from system_role_menu_action where action_id = #{actionId}-->
-    <!--</delete>-->
 </mapper>

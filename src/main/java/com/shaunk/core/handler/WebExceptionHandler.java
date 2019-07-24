@@ -87,7 +87,7 @@ public class WebExceptionHandler {
     public R errorHandler(HttpServletRequest request, HttpServletResponse response, Exception e) {
         log.error(e.getMessage());
         log.error("err", e);
-        return R.fail(e.getMessage());
+        return R.fail("系统异常，请联系管理员！");
     }
 
 }
